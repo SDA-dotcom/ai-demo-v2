@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your AI Reflection</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { -webkit-text-size-adjust: 100%; }
+  body { font-family: system-ui, "Segoe UI", Roboto, sans-serif; background: radial-gradient(circle at top, #1e1347 0%, #0d0a1c 60%); color: #eef0ff; min-height: 100vh; padding: 16px; }
+  .wrap { width: 100%; max-width: 660px; margin: 0 auto; }
+  .label { text-align: center; font-size: 12px; letter-spacing: 2px; color: #a78bfa; text-transform: uppercase; margin-top: 8px; }
+  h1 { text-align: center; font-size: 24px; line-height: 1.25; margin: 6px 0 14px; }
+  .progress { height: 6px; background: #2a2350; border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .progress span { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#22d3ee,#a78bfa,#ec4899); transition: width .5s; }
+  .card { background: rgba(26,21,51,0.92); border: 1px solid #2f2857; border-radius: 18px; padding: 20px; margin-bottom: 14px; }
+  .step-label { font-size: 12px; color: #a78bfa; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .q { font-size: 20px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
+  .hint { font-size: 14px; color: #b8bcd6; margin-bottom: 14px; line-height: 1.5; }
+  .opts { display: flex; flex-direction: column; gap: 10px; }
+  .opt { padding: 14px 16px; border-radius: 12px; border: 1px solid #3b3370; background: #120e26; color: #eef0ff; font-size: 16px; text-align: left; cursor: pointer; min-height: 52px; width: 100%; }
+  .opt.on { background: linear-gradient(135deg,#7c3aed,#ec4899); border-color: transparent; }
+  textarea { width: 100%; min-height: 110px; padding: 14px; border-radius: 12px; border: 1px solid #3b3370; background: #120e26; color: #eef0ff; font-size: 16px; font-family: inherit; resize: vertical; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .chip { padding: 10px 14px; border-radius: 99px; border: 1px solid #3b3370; background: #120e26; color: #eef0ff; font-size: 14px; cursor: pointer; }
+  .chip.on { background: linear-gradient(135deg,#7c3aed,#ec4899); border-color: transparent; }
+  .nav { display: flex; gap: 10px; margin-top: 16px; }
+  .btn { flex: 1; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; min-height: 52px; color: #fff; background: linear-gradient(135deg,#7c3aed,#ec4899); }
+  .btn.ghost { background: #2a2350; }
+  .btn.gold { background: linear-gradient(135deg,#f59e0b,#ef4444); }
+  .hidden { display: none !important; }
+  .big-num { font-size: 56px; font-weight: 800; text-align: center; background: linear-gradient(90deg,#f59e0b,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 6px 0; }
+  .center { text-align: center; }
+  .muted { color: #b8bcd6; font-size: 14px; line-height: 1.5; }
+  .live-box { background: #0d0a1c; border: 1px solid #3b3370; border-radius: 14px; padding: 16px; min-height: 160px; font-size: 15px; line-height: 1.6; white-space: pre-wrap; }
+  .block { background: rgba(26,21,51,0.92); border: 1px solid #2f2857; border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .block h2 { font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; color: #a78bfa; margin-bottom: 10px; }
+  .block p { font-size: 16px; line-height: 1.6; }
+  .block ul { padding-left: 20px; line-height: 1.8; font-size: 15px; }
+  .quote { font-size: 16px; line-height: 1.7; border-left: 3px solid #ec4899; padding-left: 14px; }
+  .bar { height: 10px; background: #2a2350; border-radius: 99px; overflow: hidden; margin: 6px 0 12px; }
+  .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg,#22d3ee,#a78bfa,#ec4899); transition: width .6s; }
+  .row { display: flex; justify-content: space-between; font-size: 14px; color: #d8dcf5; }
+  .persona { font-size: 24px; font-weight: 800; background: linear-gradient(90deg,#22d3ee,#a78bfa,#ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 6px 0; }
+  .unlock { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 12px; margin-bottom: 8px; font-size: 15px; }
+  .unlock.yes { background: #12281e; border: 1px solid #1f5a3d; }
+  .unlock.no { background: #1f1a2e; border: 1px dashed #4b4470; color: #b8bcd6; }
+  .tags { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: #86efac; background: #0d0a1c; border: 1px dashed #3b3370; border-radius: 10px; padding: 12px; line-height: 1.7; word-break: break-word; }
+  .foot { text-align: center; font-size: 11px; color: #7c7aa0; margin: 14px 0; line-height: 1.5; }
+  @media print { body { background: #fff; color: #000; } .no-print { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label">AI Learner Experience</div>
+  <h1 id="mainTitle">Let's see what your time is really worth</h1>
+
+  <div id="s-start" class="card">
+    <div class="q">Three steps. Under three minutes.</div>
+    <p class="hint">First, we'll look at the time you could be getting back. Then you'll see AI working on your own prompt, and finish with your AI profile.</p>
+    <div class="nav"><button class="btn" id="startBtn">Start</button></div>
+  </div>
+
+  <div id="s-cost" class="hidden">
+    <div class="card">
+      <div class="step-label">Step 1 of 3</div>
+      <div class="q">Which task takes up most of your week?</div>
+      <div class="opts" id="taskOpts"></div>
+    </div>
+    <div class="card">
+      <div class="step-label">Roughly how long?</div>
+      <div class="q">Hours per week on that task</div>
+      <div class="opts" id="hourOpts"></div>
+      <div class="nav"><button class="btn" id="revealCost">Reveal my hidden cost</button></div>
+    </div>
+  </div>
+
+  <div id="s-reveal" class="hidden">
+    <div class="card center">
+      <div class="step-label">Hidden cost</div>
+      <div class="q">Here's what that costs you each year</div>
+      <div class="big-num" id="yearHours">0</div>
+      <div class="muted">hours a year on <span id="taskName"></span></div>
+      <div class="muted" style="margin-top:10px;" id="weeksLine"></div>
+      <p class="muted" style="margin-top:12px;">An estimate from your answers. Many people cut this kind of task by half or more once they know how to use AI well.</p>
+    </div>
+    <div class="nav"><button class="btn" id="toSurvey">Continue</button></div>
+  </div>
+
+  <div id="s-survey" class="hidden">
+    <div class="progress"><span id="bar"></span></div>
+    <div class="card">
+      <div class="step-label" id="stepLbl"></div>
+      <div class="q" id="qTitle"></div>
+      <div class="hint" id="qHint"></div>
+      <div id="qBody"></div>
+      <div class="nav">
+        <button class="btn ghost" id="backBtn">Back</button>
+        <button class="btn" id="nextBtn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="s-live" class="hidden">
+    <div class="card">
+      <div class="step-label">Watch AI work on your task</div>
+      <div class="q">Your prompt, handled live</div>
+      <p class="hint">Here is what the AI produces from the prompt you wrote earlier.</p>
+      <div class="live-box" id="liveOut"></div>
+      <p class="muted" style="margin-top:8px;">Demo output from a prepared template built on your prompt. Live AI can be connected later.</p>
+      <div class="nav"><button class="btn" id="toResult">See my AI profile</button></div>
+    </div>
+  </div>
+
+  <div id="loading" class="hidden">
+    <div class="card center"><div class="q">Building your profile...</div></div>
+  </div>
+
+  <div id="result" class="hidden">
+    <div class="block center">
+      <div class="step-label">Your AI persona</div>
+      <div class="persona" id="persona"></div>
+      <p class="muted" id="personaLine"></p>
+    </div>
+    <div class="block">
+      <h2>AI sees you</h2>
+      <ul id="reflectList"></ul>
+    </div>
+    <div class="block">
+      <h2>Your future self, one year on</h2>
+      <div class="quote" id="future"></div>
+      <h2 style="margin-top:16px;">Advice from your future self</h2>
+      <ul id="advice"></ul>
+    </div>
+    <div class="block">
+      <h2>Your prompt check</h2>
+      <div class="row"><span>Prompt score</span><span id="promptPct"></span></div>
+      <div class="bar"><span id="promptBar"></span></div>
+      <p id="promptFix" style="font-size:15px;line-height:1.6;"></p>
+    </div>
+    <div class="block">
+      <h2>Your skill picture</h2>
+      <div class="row"><span>Prompting</span><span id="sPrompt"></span></div>
+      <div class="bar"><span id="bPrompt"></span></div>
+      <div class="row"><span>Tool knowledge</span><span id="sTool"></span></div>
+      <div class="bar"><span id="bTool"></span></div>
+      <div class="row"><span>Checking output</span><span id="sCheck"></span></div>
+      <div class="bar"><span id="bCheck"></span></div>
+      <div class="row"><span>Creating content</span><span id="sCreate"></span></div>
+      <div class="bar"><span id="bCreate"></span></div>
+      <p style="font-size:14px;margin-top:8px;" id="gap"></p>
+    </div>
+    <div class="block">
+      <h2>What you can already do</h2>
+      <div id="unlockedList"></div>
+      <h2 style="margin-top:14px;">Unlocked when you join the course</h2>
+      <div id="lockedList"></div>
+    </div>
+    <div class="block">
+      <h2>Your mission this week</h2>
+      <p id="mission"></p>
+    </div>
+    <div class="block">
+      <h2>Your biggest opportunity</h2>
+      <p class="muted" id="oppLine"></p>
+      <button class="btn gold" id="book" style="width:100%;margin-top:12px;">Book my free consultation</button>
+      <button class="btn ghost" id="shareBtn" style="width:100%;margin-top:10px;">Share my profile</button>
+    </div>
+    <div class="block center">
+      <p class="muted" style="font-size:13px;">Advisor says:</p>
+      <p class="quote" style="border:none;padding:0;">"Based on what you just saw, let's map out which course gets you there fastest. Shall we lock in your free consultation now?"</p>
+    </div>
+    <div class="block">
+      <h2>CRM tags</h2>
+      <div class="tags" id="tags"></div>
+    </div>
+    <div class="nav no-print">
+      <button class="btn ghost" onclick="window.print()">Print / Save</button>
+      <button class="btn" onclick="location.reload()">New learner</button>
+    </div>
+  </div>
+
+  <div class="foot">Demo only. Estimates and sample outputs are prepared templates, not live AI output.</div>
+</div>
+
+<script>
+const TASKS = ["Writing reports and proposals","Writing and replying to emails","Planning and scheduling","Researching and summarising","Creating presentations or visuals","Analysing data or spreadsheets"];
+const HOURS = [
+  { label: "1 to 2 hours", value: 1.5 },
+  { label: "3 to 5 hours", value: 4 },
+  { label: "6 to 10 hours", value: 8 },
+  { label: "More than 10 hours", value: 12 }
+];
+const CAREERS = ["IT","Marketing/Sales","Business Owner","Student","HR","Finance","Engineering","Healthcare","Creative/Arts"];
+const TOOLS = ["ChatGPT","Claude","Gemini","Leonardo AI","Suno","Project Genie","Other","None yet"];
+const USES = ["Writing emails and messages","Writing reports and proposals","Summarising long documents","Research and fact-finding","Planning trips and events","Planning my weekly schedule","Cooking and meal planning","Fitness and wellness routines","Creating images and visuals","Making music or audio","Writing scripts or content","Coding or building tools","Analysing data or spreadsheets","Learning a new skill","Other"];
+const SCENARIOS = [
+  { label: "Create a picture", text: "Create a picture of a modern office with a team planning a campaign, bright and friendly." },
+  { label: "My data is messy", text: "I have a messy spreadsheet of sales numbers. Help me clean it and find the three biggest trends." },
+  { label: "Plan an itinerary", text: "Plan a 3-day Tokyo itinerary for a food lover with a budget of around S$1,000." },
+  { label: "Write an email", text: "Write a short, polite email to a customer explaining a delay in delivery." },
+  { label: "Summarise a document", text: "Summarise this 20-page report into five bullet points for my manager." },
+  { label: "Plan my week", text: "Help me plan my week with three work deadlines and time for exercise." },
+  { label: "Something else", text: "" }
+];
+
+const state = { task: null, hours: null, career: "Marketing/Sales", tools: [], uses: [], scenario: "", prompt: "", change: "" };
+
+const steps = [
+  { id: "career", label: "Step 2 of 3 · About you", title: "What best describes your work?", hint: "Choose one.", type: "single", options: CAREERS },
+  { id: "tools", label: "Step 2 of 3 · About you", title: "Which AI tools have you used?", hint: "Tick all that apply.", type: "multi", options: TOOLS },
+  { id: "uses", label: "Step 2 of 3 · About you", title: "What do you mainly use AI for?", hint: "Tick all that apply.", type: "multi", options: USES },
+  { id: "prompt", label: "Step 3 of 3 · Your prompt", title: "How do you usually write your prompt?", hint: "Pick the situation closest to yours, then edit the prompt you would really use.", type: "scenario" },
+  { id: "change", label: "Step 3 of 3 · Your goal", title: "What do you want to be different in a year?", hint: "One sentence, in your own words.", type: "text", placeholder: "e.g. I want to stop spending my evenings on reports." }
+];
+
+let idx = 0;
+
+function show(id) {
+  ["s-start","s-cost","s-reveal","s-survey","s-live","loading","result"].forEach(s => document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function buildCost() {
+  const box = document.getElementById("taskOpts");
+  box.innerHTML = "";
+  TASKS.forEach(t => {
+    const b = document.createElement("button");
+    b.className = "opt" + (state.task === t ? " on" : "");
+    b.textContent = t;
+    b.onclick = () => { state.task = t; buildCost(); };
+    box.appendChild(b);
+  });
+  const hb = document.getElementById("hourOpts");
+  hb.innerHTML = "";
+  HOURS.forEach(h => {
+    const b = document.createElement("button");
+    b.className = "opt" + (state.hours === h.value ? " on" : "");
+    b.textContent = h.label;
+    b.onclick = () => { state.hours = h.value; buildCost(); };
+    hb.appendChild(b);
+  });
+}
+
+document.getElementById("startBtn").onclick = () => { show("s-cost"); buildCost(); };
+
+document.getElementById("revealCost").onclick = () => {
+  if (!state.task || !state.hours) { alert("Please choose a task and hours."); return; }
+  const yearHours = Math.round(state.hours * 46);
+  const weeks = Math.round((yearHours / 40) * 10) / 10;
+  document.getElementById("taskName").textContent = state.task.toLowerCase();
+  document.getElementById("weeksLine").textContent = "That's about " + weeks + " full working weeks a year.";
+  document.getElementById("yearHours").textContent = yearHours;
+  show("s-reveal");
+};
+
+document.getElementById("toSurvey").onclick = () => { idx = 0; show("s-survey"); render(); };
+
+function render() {
+  const s = steps[idx];
+  document.getElementById("bar").style.width = ((idx + 1) / steps.length * 100) + "%";
+  document.getElementById("stepLbl").textContent = s.label;
+  document.getElementById("qTitle").textContent = s.title;
+  document.getElementById("qHint").textContent = s.hint;
+  const body = document.getElementById("qBody");
+  body.innerHTML = "";
+
+  if (s.type === "single" || s.type === "multi") {
+    const wrap = document.createElement("div");
+    wrap.className = "opts";
+    s.options.forEach(opt => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = opt;
+      const isOn = s.type === "single" ? state[s.id] === opt : state[s.id].includes(opt);
+      if (isOn) b.classList.add("on");
+      b.onclick = () => {
+        if (s.type === "single") {
+          state[s.id] = opt;
+        } else if (opt === "None yet") {
+          state[s.id] = ["None yet"];
+        } else {
+          const arr = state[s.id].filter(x => x !== "None yet");
+          state[s.id] = arr.includes(opt) ? arr.filter(x => x !== opt) : [...arr, opt];
+        }
+        render();
+      };
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+  } else if (s.type === "scenario") {
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    SCENARIOS.forEach(sc => {
+      const c = document.createElement("button");
+      c.className = "chip" + (state.scenario === sc.label ? " on" : "");
+      c.textContent = sc.label;
+      c.onclick = () => { state.scenario = sc.label; if (sc.text) state.prompt = sc.text; render(); };
+      chips.appendChild(c);
+    });
+    body.appendChild(chips);
+    const ta = document.createElement("textarea");
+    ta.placeholder = "Type the prompt you would really use...";
+    ta.value = state.prompt;
+    ta.oninput = () => { state.prompt = ta.value; };
+    body.appendChild(ta);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.placeholder = s.placeholder || "";
+    ta.value = state[s.id];
+    ta.oninput = () => { state[s.id] = ta.value; };
+    body.appendChild(ta);
+  }
+
+  document.getElementById("backBtn").style.visibility = idx === 0 ? "hidden" : "visible";
+  document.getElementById("nextBtn").textContent = idx === steps.length - 1 ? "Continue" : "Next";
+}
+
+function canAdvance() {
+  const s = steps[idx];
+  if (s.type === "single") return !!state[s.id];
+  if (s.type === "multi") return state[s.id].length > 0;
+  if (s.type === "scenario") return state.prompt.trim().length > 0;
+  return state[s.id].trim().length > 0;
+}
+
+document.getElementById("nextBtn").onclick = () => {
+  if (!canAdvance()) { alert("Please answer this question first."); return; }
+  if (idx < steps.length - 1) { idx++; render(); }
+  else { showLive(); }
+};
+document.getElementById("backBtn").onclick = () => { if (idx > 0) { idx--; render(); } };
+
+function preparedOutput(prompt, career) {
+  const p = prompt.trim();
+  return "Your prompt:\n\"" + p.slice(0, 160) + (p.length > 160 ? "..." : "") + "\"\n\n" +
+    "Prepared output for a " + career + " professional:\n\n" +
+    "1. Clear structure with a headline and three key points\n" +
+    "2. Tone adjusted to your audience\n" +
+    "3. Action steps you can use today\n" +
+    "4. A quick checklist to verify facts, names and numbers\n\n" +
+    "Result in seconds. You still review it before it goes out.";
+}
+
+function showLive() {
+  show("s-live");
+  document.getElementById("mainTitle").textContent = "Here is AI working on your task";
+  const out = document.getElementById("liveOut");
+  out.textContent = "";
+  const full = preparedOutput(state.prompt || "your task", state.career || "your");
+  let i = 0;
+  const typer = setInterval(() => {
+    i += 3;
+    out.textContent = full.slice(0, i);
+    if (i >= full.length) { out.textContent = full; clearInterval(typer); }
+  }, 18);
+}
+
+document.getElementById("toResult").onclick = () => {
+  show("loading");
+  setTimeout(buildResult, 1500);
+};
+
+function scorePrompt(p) {
+  const t = p.toLowerCase();
+  const checks = {
+    role: /\b(act as|you are|as a|role)\b/.test(t),
+    context: p.length > 60 || /\b(for|about|because|my|our|audience|customer|team)\b/.test(t),
+    format: /\b(list|table|bullet|steps|summary|format|words|paragraph|email|slides?|itinerary|points?)\b/.test(t),
+    constraints: /\b(under|within|no more than|avoid|tone|simple|plain|only|limit|budget|\$|s\$)\b/.test(t)
+  };
+  const hits = Object.values(checks).filter(Boolean).length;
+  return { pct: Math.round(hits / 4 * 100), checks };
+}
+
+function promptFix(checks) {
+  const missing = [];
+  if (!checks.role) missing.push("start with a role, such as \"Act as a travel planner\"");
+  if (!checks.context) missing.push("add context about who it's for and why");
+  if (!checks.format) missing.push("ask for a format, such as a bullet list or a table");
+  if (!checks.constraints) missing.push("add a limit, such as a budget, length, or tone");
+  if (missing.length === 0) return "Strong prompt. Keep checking the output before you use it.";
+  return "To improve: " + missing.join("; ") + ".";
+}
+
+function mission(career) {
+  const m = {
+    "IT": "Paste five anonymised support notes into Claude and ask for a grouped summary.",
+    "Marketing/Sales": "Ask ChatGPT for five headline options for your next post, then pick one to refine.",
+    "Business Owner": "List three numbers from your last month and ask Gemini what changed.",
+    "Student": "Paste one reading into Gemini and ask for a five-point summary.",
+    "HR": "Ask ChatGPT for a draft job description for one open role, then check it for bias.",
+    "Finance": "Paste anonymised figures into Gemini and ask for the three biggest changes.",
+    "Engineering": "Give Claude your notes and ask for a clear one-page technical overview.",
+    "Healthcare": "Ask ChatGPT to rewrite one patient leaflet in plain language, then have a colleague check it.",
+    "Creative/Arts": "Describe a project to ChatGPT and ask for ten concept directions."
+  };
+  return m[career] || "Pick one repetitive task and try it with one AI tool tonight.";
+}
+
+function adviceFor(uses) {
+  const list = [];
+  list.push("Start small. One task a week, done with AI and checked by you, builds the habit faster than a big plan.");
+  if (uses.some(u => /Writing|report|email/i.test(u)))
+    list.push("Keep a short library of your best prompts so you never start from a blank page.");
+  if (uses.some(u => /Summaris|Analys|data/i.test(u)))
+    list.push("Always check numbers and names against the source. AI can sound confident and still be wrong.");
+  if (uses.some(u => /Images|music|Music/i.test(u)))
+    list.push("Describe the mood, the audience, and the purpose. The better the brief, the better the result.");
+  list.push("Protect private information. Anonymise names and figures before pasting them into any tool.");
+  list.push("Celebrate the small wins. Your one sentence about change is already the start of it.");
+  return list.slice(0, 5);
+}
+
+function buildResult() {
+  const career = state.career || "your field";
+  const change = (state.change || "").trim();
+  const uses = state.uses.length ? state.uses : ["your daily work"];
+  const { pct, checks } = scorePrompt(state.prompt || "");
+  const task = state.task || "your weekly work";
+  const hrs = Math.round((state.hours || 0) * 46);
+
+  let persona = "The Time Reclaimer";
+  if (/Creat|Presentation/i.test(task)) persona = "The Creative Accelerator";
+  else if (/Analys|data/i.test(task)) persona = "The Data Navigator";
+  else if (/Research|summar/i.test(task)) persona = "The Insight Seeker";
+  else if (/email|Plan/i.test(task)) persona = "The Smart Organiser";
+  document.getElementById("persona").textContent = persona;
+  document.getElementById("personaLine").textContent = "You spend about " + hrs + " hours a year on " + task.toLowerCase() + ". Here's your path to get that time back.";
+
+  const reflect = [
+    "You work in " + career + ", and you're already asking how AI can help you.",
+    "Tools you've used: " + (state.tools.includes("None yet") || !state.tools.length ? "none yet, so you're starting with a clean slate" : state.tools.join(", ")) + ".",
+    "You mainly use AI for: " + uses.slice(0,3).join(", ").toLowerCase() + ".",
+    "Your prompt shows real-world thinking: \"" + (state.prompt || "").trim().slice(0, 90) + ((state.prompt || "").trim().length > 90 ? "..." : "") + "\"",
+    "You want this to change: \"" + change.slice(0, 100) + (change.length > 100 ? "..." : "") + "\"",
+    "That is the hardest step, and you've already named it."
+  ];
+  const rl = document.getElementById("reflectList");
+  rl.innerHTML = "";
+  reflect.forEach(r => { const li = document.createElement("li"); li.textContent = r; rl.appendChild(li); });
+
+  document.getElementById("future").textContent =
+    "Hello from one year on. I remember sitting down as a " + career + " professional, not sure where AI fit. " +
+    "I started with one small habit: checking every answer before I used it. Within a few months, " +
+    "I was using AI for " + uses.slice(0,2).join(" and ").toLowerCase() + ", and the " + task.toLowerCase() +
+    " that used to take my evenings was faster and calmer. The time I wanted back is mine again. " +
+    "You're closer than you think. It started with you saying this out loud.";
+
+  const al = document.getElementById("advice");
+  al.innerHTML = "";
+  adviceFor(uses).forEach(a => { const li = document.createElement("li"); li.textContent = a; al.appendChild(li); });
+
+  document.getElementById("promptPct").textContent = pct + "%";
+  document.getElementById("promptBar").style.width = pct + "%";
+  document.getElementById("promptFix").textContent = promptFix(checks);
+
+  const toolCount = state.tools.includes("None yet") ? 0 : state.tools.length;
+  const scores = {
+    prompt: pct,
+    tool: Math.min(100, toolCount * 20),
+    check: (state.prompt || "").length > 80 ? 55 : 35,
+    create: state.uses.some(u => /Images|Music|Writing|scripts/i.test(u)) ? 60 : 30
+  };
+  const set = (id, bar, v) => { document.getElementById(id).textContent = v + "%"; document.getElementById(bar).style.width = v + "%"; };
+  set("sPrompt","bPrompt",scores.prompt);
+  set("sTool","bTool",scores.tool);
+  set("sCheck","bCheck",scores.check);
+  set("sCreate","bCreate",scores.create);
+
+  const weakest = Object.entries(scores).sort((a,b) => a[1]-b[1])[0][0];
+  const names = { prompt: "prompting", tool: "tool knowledge", check: "checking output", create: "creating content" };
+  document.getElementById("gap").textContent = "Biggest gap: " + names[weakest] + ". This is where the course will help most first.";
+
+  const unlocked = ["Describe a task clearly to AI", "Try AI on your own real work"];
+  const locked = ["Build a repeatable AI workflow for " + task.toLowerCase(), "Check and improve AI output with confidence", "Create your own AI toolkit for your role"];
+  const ul = document.getElementById("unlockedList");
+  const ll = document.getElementById("lockedList");
+  ul.innerHTML = ""; ll.innerHTML = "";
+  unlocked.forEach(u => { const d = document.createElement("div"); d.className = "unlock yes"; d.textContent = "✓ " + u; ul.appendChild(d); });
+  locked.forEach(l => { const d = document.createElement("div"); d.className = "unlock no"; d.textContent = "🔒 " + l; ll.appendChild(d); });
+
+  document.getElementById("mission").textContent = mission(career);
+  document.getElementById("oppLine").textContent = "Your biggest opportunity is " + task.toLowerCase() + ". Our course starts there, so you save the most time first.";
+
+  document.getElementById("tags").textContent =
+    "[Career: " + career + "] [Tools: " + (state.tools.join(", ") || "None") + "] [Use: " + uses.slice(0,3).join(", ") + "] [Task: " + task + "] [Hours: " + (state.hours || 0) + "/wk] [Prompt: " + pct + "%] [Gap: " + names[weakest].replace(/ /g,"-") + "]";
+
+  document.getElementById("mainTitle").textContent = "Your AI reflection";
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("result").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.getElementById("book").onclick = () => { alert("Great. An advisor will contact you to book your free consultation."); };
+document.getElementById("shareBtn").onclick = () => {
+  const text = "My AI profile: " + document.getElementById("persona").textContent + ". Find yours: " + location.href;
+  if (navigator.share) navigator.share({ text }).catch(() => {});
+  else navigator.clipboard.writeText(text).then(() => alert("Profile copied to share."));
+};
+</script>
+</body>
+</html>
